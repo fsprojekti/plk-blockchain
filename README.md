@@ -26,8 +26,9 @@ style PL fill:#AED6F1, stroke:#3498DB
 ```mermaid
 graph LR
     A[JetMax robotic arm]
+    B[Raspberry Pi]
     C[PLK]
-    A---|Modbus|C
+    A---|Socket|B---|Modbus|C
 ```
 Rack warehouse has 4 docs with capacity to stack 4 packages on top of each other. 
 
