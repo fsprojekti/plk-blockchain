@@ -78,7 +78,7 @@ G---|Modubs protocol|K
 style AL fill:#D7BDE2, stroke:#884EA0
 ```
 ### Warehouse control
-### Modubs master
+### Modbus master
 ### Modbus slave
 ### Smart contract control app
 ### Smart contract
