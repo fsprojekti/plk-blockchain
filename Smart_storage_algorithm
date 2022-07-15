@@ -1,0 +1,215 @@
+//SPDX-License-Identifier: MIT
+pragma solidity ^0.8.x;
+
+import '@chainlink/contracts/src/v0.8/ChainlinkClient.sol';
+import '@chainlink/contracts/src/v0.8/ConfirmedOwner.sol';
+
+
+
+
+contract Sorting is ChainlinkClient, ConfirmedOwner{ //Chainlink part is outsourced from: https://docs.chain.link/docs/get-the-latest-price/
+    using Chainlink for Chainlink.Request;
+
+    uint256 public volume;
+    bytes32 private jobId;
+    uint256 private fee;
+   uint[] state;
+   uint[] calculating;
+   uint[] moving;
+   uint[] old_state;
+   uint movement;
+   uint calculation;
+   uint global;
+   uint smallest;
+   uint new_state;
+   uint largest1;
+   uint second_smallest;
+   uint third_smallest;
+   uint fourth_smallest;
+   event RequestVolume(bytes32 indexed requestId, uint256 volume);
+  /* 
+   uint stack1;          // In the future this section will be developed. It could be use to calculate sum of parcels in each column. Since this is still in development stage, we will hard-code number of parcels in each column.
+   uint stack2;
+   uint stack3;
+   uint stack4;
+  
+   
+   // bool to uint
+    uint stack1_1 = senzor_1 ? uint(1) : uint(0);            // An example of calculation.
+    uint stack1_2 = senzor_2 ? uint(1) : uint(0);
+    uint stack1_3 = senzor_3 ? uint(1) : uint(0);
+    uint stack1_4 = senzor_4 ? uint(1) : uint(0);
+
+    stack1 = stack1_1 + stack1_2 + stack1_3 + stack1_4;
+
+    uint stack2_1 = senzor_5 ? uint(1) : uint(0);
+    uint stack2_2 = senzor_6 ? uint(1) : uint(0);
+    uint stack2_3 = senzor_7 ? uint(1) : uint(0);
+    uint stack2_4 = senzor_8 ? uint(1) : uint(0);
+    
+    stack2 = stack2_1 + stack2_2 + stack2_3 + stack2_4;
+
+    uint stack3_1 = senzor_9 ? uint(1) : uint(0);
+    uint stack3_2 = senzor_10 ? uint(1) : uint(0);
+    uint stack3_3 = senzor_11 ? uint(1) : uint(0);
+    uint stack3_4 = senzor_12 ? uint(1) : uint(0);
+    
+    stack3 = stack3_1 + stack3_2 + stack3_3 + stack3_4;
+
+    uint stack4_1 = senzor_13 ? uint(1) : uint(0);
+    uint stack4_2 = senzor_14 ? uint(1) : uint(0);
+    uint stack4_3 = senzor_15 ? uint(1) : uint(0);
+    uint stack4_4 = senzor_16 ? uint(1) : uint(0);
+    
+    stack4 = stack4_1 + stack4_2 + stack4_3 + stack4_4;
+
+    state[] = {stack1, stack2, stack3, stack4}; // Final smart storage state is an array of columns.
+
+    */
+
+    constructor() payable ConfirmedOwner(msg.sender) {              // Start of chainlink part.
+        setChainlinkToken(0x01BE23585060835E02B77ef475b0Cc51aA1e0709);
+        setChainlinkOracle(0xf3FBB7f3391F62C8fe53f89B41dFC8159EE9653f);
+        jobId = 'fcf4140d696d44b687012232948bdd5d';
+        fee = (1 * LINK_DIVISIBILITY) / 10; // 0,1 * 10**18 (Varies by network and job)
+    }
+    
+
+    function requestVolumeData() public returns (bytes32 requestId) {
+        Chainlink.Request memory req = buildChainlinkRequest(jobId, address(this), this.fulfill.selector);
+
+        // Set the URL to perform the GET request on
+        req.add('get', 'https://ipfs.io/ipfs/QmPeXCLrPxLV5cW84n2yWcNWFqhmZR6XpBHgw6eS5raenz?filename=warehouse_state.json');
+        req.add('path', 'first_column'); // Chainlink nodes 1.0.0 and later support this format
+        int256 timesAmount = 1;
+        req.addInt('times', timesAmount);
+        return sendChainlinkRequest(req, fee);
+    }
+
+    function fulfill(bytes32 _requestId, uint256 _volume) public recordChainlinkFulfillment(_requestId) {
+        emit RequestVolume(_requestId, _volume);
+        volume = _volume;
+    }
+
+    function withdrawLink() public onlyOwner {
+        LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
+        require(link.transfer(msg.sender, link.balanceOf(address(this))), 'Unable to transfer');  // End of chainlink part.
+    }
+
+
+
+
+   function A_Storing(uint[] memory _state1) public  returns(uint[] memory) {  // Hard coding values as mentioned above. In future this function won't have any user input.
+       state = _state1;
+       old_state = _state1;
+       return state;
+   }
+   function B_Comparison(uint[] memory _state) public  returns(uint){   // Function that iterates through the data and stores the smallest value into variable called "smallest".  
+  
+    uint index = 0;                                                     // The function also determines / sorts out other values in array by their size (smallest -> largest).
+    uint min = _state[0];
+    uint temp;
+    for (uint _i = 1; _i <= 3; _i++){
+        if (_state[_i] < min){
+        min = _state[_i];
+        index = _i;
+
+	for(uint i = 1; i <= 3; i++ ){
+         for(uint j = i+1; j<=3; j++){
+            if(_state[i]>_state[j]){
+               temp = _state[i];
+               _state[i] = _state[j];
+               _state[j] = temp;
+               second_smallest = state[1];
+               third_smallest = state[2];
+               fourth_smallest = state[3];
+            }
+         }
+      }
+        
+        
+        }
+    }
+    smallest = index;
+    return index; }
+    // Now we know the index of the column that has the least parcels, assuming that columns go from left to right. We have the optimal columns to unload other parcels,
+    // in order to reach the desired parcel.
+
+    function C_Choice(uint[] memory coordinates) public returns(uint, uint) { // Assuming that columns go from left to right, the only important parameter is the number of parcels in each column.
+      uint largest;
+      calculating = coordinates;                                    // In this function, user chooses the desired parcel.
+      
+      uint maxindex = 0; 
+      for(uint m = 1; m <= 3; m++){
+            if(coordinates[m] > largest) {
+                largest = coordinates[m]; 
+       
+   } }
+         
+        
+       for (uint n = 1; n <= 3; n++) { 
+            if (coordinates[n] > coordinates[maxindex]) {     
+                 maxindex = n;  
+                 global = maxindex;
+    } 
+}  
+            largest1 = coordinates[maxindex];
+                     
+        return (largest1, maxindex);
+
+
+    }
+   
+ // Desired parcel syntax [0,x,0,0], with x being height (y position) of a parcel in column.
+ 
+   
+    function D_Calculation() public returns(uint[] memory)  {   // Array calculations.
+        if (largest1 == 4){
+            state[global] = 4;
+        }
+        if (largest1 == 3){
+            state[global] = 3;
+        }
+        if (largest1 == 2){
+            state[global] = 2;
+
+        }
+        if (largest1 == 1){
+            state[global] = 1;
+
+        }
+         return state;
+    }
+    
+    function E_Moving_parcel() public returns(uint, uint[] memory){  // This function calculates optimal number of parcels in each column and displays the new state of storage.
+       
+        new_state = old_state[smallest] + (old_state[global] - state[global]); 
+        return (new_state, state); 
+        
+
+    }
+    
+    function F_Deciding() public {                                    // Decision based mechanism, which uses the fact that maximum height of each column is 4. If the maximum height is reached, then parcels are being moved to second_smallest column and so on.
+        if (state[second_smallest] > 4) {
+            state[third_smallest] = state[third_smallest] + (state[second_smallest] - 4);
+            state[second_smallest] = 4;
+        }
+
+        if (state[third_smallest] > 4) {
+            state[fourth_smallest] = state[fourth_smallest] + (state[fourth_smallest] - 4);
+            state[fourth_smallest] = 4;
+        }
+        if (state[fourth_smallest] > 4) {
+           // function Overload() public returns(string) {
+               // return "Error: OVERLOAD";
+            }
+        }
+
+
+
+}
+
+    
+
+   
+   
