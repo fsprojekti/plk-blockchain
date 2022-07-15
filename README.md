@@ -14,7 +14,7 @@ subgraph PL [Physical layer]
   D[Blockchain node]
 end
 
-A---|Electrical connections|B
+A---|modbus|B
 B---|TPC/IP|C
 C---|Internet|D
 
