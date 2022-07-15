@@ -23,33 +23,8 @@ style PL fill:#AED6F1, stroke:#3498DB
 ```
 ### Rack warehouse
 
-```mermaid
-graph LR
-    A[JetMax robotic arm]
-    B[Raspberry Pi]
-    C[PLK]
-    A---|Socket|B---|Modbus|C
-```
-Rack warehouse has 4 docs with capacity to stack 4 packages on top of each other. 
+[Warehouse project](https://github.com/fsprojekti/rack-warehouse-jetmax)
 
-|||||
-|---|---|---|---|
-|slot 12|slot 13|slot 14|slot 15|
-|slot 8|slot 9|slot 10|slot 11|
-|slot 4|slot 5|slot 6|slot 7|
-|slot 0|slot 1|slot 2|slot 3|
-
-Modbus variables
-|Register|Type|Read/Write|Name|Description|Instructions|
-|---|---|---|---|---|---|
-|100|register|Read|slots|Current state slot occupation (masked 16bit integer)|slots variable is masked 16bit integer. Each bit represents one slot in a warehouse totaling to 16 slots
-|200|coil|Write|execute|Begin moving robot according to selected coordinates|triggers on rising edge (0->1)
-|201|coil|Read|suck|State of sucking gripper|false - not sucking, true - sucking
-|101|register|Read|state|State of the warehouse|0-idle, 1-moving, 2-error)
-|102|register|Write|slot_source|Source slot number from which package will be taken|values from 0 to 15
-|103|register|Write|slot_target|Target slot number to which package will be put|values from 0 to 15
-
-**slots** 
 
 ## Application layer
 ```mermaid
