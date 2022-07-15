@@ -53,6 +53,9 @@ G---|Modubs protocol|K
 style AL fill:#D7BDE2, stroke:#884EA0
 ```
 ### Warehouse control
+
+Warehause control app is transmitig 
+
 ### Modbus master
 ### Modbus slave
 ### Smart contract control app
