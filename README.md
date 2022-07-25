@@ -14,8 +14,8 @@ subgraph PL [Physical layer]
   D[Blockchain node]
 end
 
-A---|modbus|B
-B---|TPC/IP|C
+A---|modbus TPC/IP|B
+B---|modbus TPC/IP|C
 C---|Internet|D
 
 style PL fill:#AED6F1, stroke:#3498DB
@@ -23,7 +23,9 @@ style PL fill:#AED6F1, stroke:#3498DB
 ```
 ### Rack warehouse
 
-[Warehouse project](https://github.com/fsprojekti/rack-warehouse-jetmax)
+Rack warehouse is a standalone device which can be controlled using modbus communication protocol. Detailed description is available at github repository: 
+
+[Rack warehouse project](https://github.com/fsprojekti/rack-warehouse-jetmax)
 
 
 ## Application layer
