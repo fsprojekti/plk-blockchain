@@ -125,4 +125,27 @@ Modbus communicates via registers.
 
 ## Examples
 
-### Load package to slot 7
+### Load package to slot 5
+
+```mermaid
+sequenceDiagram
+	participant A as Rack warehouse
+	participant B as PLC
+	participant C as RaspberryPi
+	participant D as Ethereum node
+
+	Note over A,D: Load package to warehouse
+	Note over B: get current state of warehouse
+	B->>A:get register 100 (modbus 1)
+	Note over B: set modbusregisters for calling load function
+	B->>C: set register 100 to current<br> state of warehouse (modbus 2)
+	B->>C: set coil 100 to true (modbus 2)
+	C->>D: call load function <br> with state of the warehouse <br>load(state)
+	D->>C: returns optimimal slot position
+	C->>B: set register 101 to <br>optimal slot value (example 5)(modbus 2)
+	C->>B: set coil 102 to true (modbus 2)
+	Note over B: Optimal load slot has been calculated <br>now transfer this info to warehouse
+	B->>A:set register 102 to 0 <br>(position of loading slot)<br>(modbus 1)
+	B->>A:set register 103 to 5 (modbus 1)
+	B->>A:set coil 200 to 1 (modbus 1)
+```
