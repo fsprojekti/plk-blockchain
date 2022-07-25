@@ -56,8 +56,7 @@ subgraph P[PLK]
   J---|RPC protocol|L
 
 D---|internal PLK communication|G
-G---|Modubs protocol|K 
-
+G---|API-PLC-RPI|K 
 ```
 ### Warehouse control
 
@@ -67,3 +66,11 @@ Warehause control app is transmitig
 ### Modbus slave
 ### Smart contract control app
 ### Smart contract
+
+## Communication protocols
+
+### API-PLC-RPI
+Communication protocol between PLC and Raspberry Pi is based on modbus TCP/IP communication. Modbus communicates via registers.
+
+|Register|Type|Read/Write|Name|Description|Instructions|
+|---|---|---|---|---|---|
